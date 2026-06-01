@@ -59,4 +59,20 @@ class TxtToPdfConverterTest {
             assertThat(document.getNumberOfPages()).isGreaterThanOrEqualTo(1);
         }
     }
+
+    @Test
+    void ignoresUtf8Bom() throws IOException {
+        String text = "\uFEFFText created by Windows tools";
+
+        byte[] pdf = converter.convertToPdf(
+                new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8)),
+                new ConversionContext("bom.txt", "corr-3", FileType.TXT)
+        );
+
+        try (PDDocument document = Loader.loadPDF(pdf)) {
+            String extractedText = new PDFTextStripper().getText(document);
+
+            assertThat(extractedText).contains("Text created by Windows tools");
+        }
+    }
 }

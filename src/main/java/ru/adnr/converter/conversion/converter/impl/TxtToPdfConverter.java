@@ -34,11 +34,31 @@ public class TxtToPdfConverter implements FileConverter {
     @Override
     public byte[] convertToPdf(InputStream inputStream, ConversionContext context) {
         try {
-            String text = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+            String text = normalizeText(new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
             return createPdf(text);
         } catch (IOException ex) {
             throw new TxtConversionException(context.originalFileName(), ex);
         }
+    }
+
+    private String normalizeText(String text) {
+        StringBuilder normalized = new StringBuilder(text.length());
+
+        for (int i = 0; i < text.length(); i++) {
+            char character = text.charAt(i);
+            if (character == '\uFEFF') {
+                continue;
+            }
+            if (Character.isISOControl(character)
+                    && character != '\r'
+                    && character != '\n'
+                    && character != '\t') {
+                continue;
+            }
+            normalized.append(character == '\t' ? ' ' : character);
+        }
+
+        return normalized.toString();
     }
 
     private byte[] createPdf(String text) throws IOException {
