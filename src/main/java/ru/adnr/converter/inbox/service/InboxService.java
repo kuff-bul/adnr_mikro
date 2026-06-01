@@ -38,8 +38,7 @@ public class InboxService {
             return false;
         }
 
-        message.setStatus(InboxStatus.PROCESSING);
-        message.setErrorMessage(null);
+        message.markProcessing();
         return true;
     }
 
@@ -48,8 +47,7 @@ public class InboxService {
         InboxMessage message = inboxMessageRepository.findWithLockByMessageId(messageId)
                 .orElseThrow(() -> new InboxMessageNotFoundException(messageId));
 
-        message.setStatus(InboxStatus.PROCESSED);
-        message.setErrorMessage(null);
+        message.markProcessed();
     }
 
     @Transactional
@@ -61,8 +59,7 @@ public class InboxService {
             return;
         }
 
-        message.setStatus(InboxStatus.FAILED);
-        message.setErrorMessage(errorMessage);
+        message.markFailed(errorMessage);
     }
 
     @Transactional(readOnly = true)

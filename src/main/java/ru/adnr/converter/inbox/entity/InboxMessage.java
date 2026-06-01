@@ -12,14 +12,12 @@ import java.time.Instant;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "inbox_message")
 @Getter
-@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class InboxMessage {
 
@@ -52,5 +50,20 @@ public class InboxMessage {
         this.messageId = messageId;
         this.payload = payload;
         this.status = InboxStatus.NEW;
+    }
+
+    public void markProcessing() {
+        this.status = InboxStatus.PROCESSING;
+        this.errorMessage = null;
+    }
+
+    public void markProcessed() {
+        this.status = InboxStatus.PROCESSED;
+        this.errorMessage = null;
+    }
+
+    public void markFailed(String errorMessage) {
+        this.status = InboxStatus.FAILED;
+        this.errorMessage = errorMessage;
     }
 }
