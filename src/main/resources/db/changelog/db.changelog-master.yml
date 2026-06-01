@@ -1,1 +1,50 @@
-databaseChangeLog: []
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-inbox-message
+      author: adnr
+      changes:
+        - createTable:
+            tableName: inbox_message
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    primaryKeyName: pk_inbox_message
+                    nullable: false
+              - column:
+                  name: message_id
+                  type: varchar(128)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: payload
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: varchar(32)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: error_message
+                  type: text
+              - column:
+                  name: created_at
+                  type: timestamp with time zone
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp with time zone
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: inbox_message
+            columnNames: message_id
+            constraintName: uk_inbox_message_message_id
