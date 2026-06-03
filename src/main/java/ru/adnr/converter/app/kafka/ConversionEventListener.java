@@ -8,12 +8,14 @@ import org.springframework.stereotype.Component;
 import ru.adnr.converter.app.dto.FileConversionRequestedEvent;
 import ru.adnr.converter.app.exception.ConversionProcessingException;
 import ru.adnr.converter.app.service.ConversionService;
+import ru.adnr.converter.app.validation.FileConversionRequestedEventValidator;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class ConversionEventListener {
 
+    private final FileConversionRequestedEventValidator eventValidator;
     private final ConversionService conversionService;
 
     @KafkaListener(
@@ -23,6 +25,7 @@ public class ConversionEventListener {
     )
     public void listen(FileConversionRequestedEvent event, Acknowledgment acknowledgment) {
         try {
+            eventValidator.validate(event);
             conversionService.process(event);
             acknowledgment.acknowledge();
         } catch (ConversionProcessingException ex) {

@@ -11,6 +11,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import ru.adnr.converter.inbox.entity.InboxMessage;
 import ru.adnr.converter.inbox.entity.InboxStatus;
 import ru.adnr.converter.inbox.repository.InboxMessageRepository;
+import ru.adnr.converter.inbox.service.impl.InboxServiceImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -25,7 +26,7 @@ class InboxServiceTest {
     private InboxMessageRepository repository;
 
     @InjectMocks
-    private InboxService inboxService;
+    private InboxServiceImpl inboxService;
 
     @Test
     void registersMessageWhenItDoesNotExist() {

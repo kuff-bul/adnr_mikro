@@ -13,13 +13,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import ru.adnr.converter.inbox.entity.InboxMessage;
 import ru.adnr.converter.inbox.entity.InboxStatus;
 import ru.adnr.converter.inbox.repository.InboxMessageRepository;
+import ru.adnr.converter.inbox.service.impl.InboxServiceImpl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Testcontainers(disabledWithoutDocker = true)
 @DataJpaTest
 @AutoConfigureTestEntityManager
-@Import(InboxService.class)
+@Import(InboxServiceImpl.class)
 class InboxServicePostgresIntegrationTest {
 
     @Container
