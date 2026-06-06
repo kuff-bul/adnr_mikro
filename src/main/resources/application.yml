@@ -46,6 +46,7 @@ app:
   kafka:
     input-topic: ${KAFKA_INPUT_TOPIC:document-conversion-input}
     output-topic: ${KAFKA_OUTPUT_TOPIC:document-conversion-output}
+    error-topic: ${KAFKA_ERROR_TOPIC:document-conversion-error}
 
   minio:
     endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
