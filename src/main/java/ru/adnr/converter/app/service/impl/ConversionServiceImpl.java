@@ -10,9 +10,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import ru.adnr.converter.app.dto.FileConversionErrorEvent;
 import ru.adnr.converter.app.dto.FileConversionCompletedEvent;
 import ru.adnr.converter.app.dto.FileConversionRequestedEvent;
 import ru.adnr.converter.app.exception.ConversionProcessingException;
+import ru.adnr.converter.app.kafka.ConversionErrorEventProducer;
 import ru.adnr.converter.app.kafka.ConversionEventProducer;
 import ru.adnr.converter.app.service.ConversionService;
 import ru.adnr.converter.conversion.context.ConversionContext;
@@ -37,6 +39,7 @@ public class ConversionServiceImpl implements ConversionService {
     private final ConverterRegistry converterRegistry;
     private final FileTypeResolver fileTypeResolver;
     private final ConversionEventProducer conversionEventProducer;
+    private final ConversionErrorEventProducer conversionErrorEventProducer;
     private final ObjectMapper objectMapper;
     private final MinioProperties minioProperties;
 
@@ -67,6 +70,7 @@ public class ConversionServiceImpl implements ConversionService {
             }
             String errorMessage = buildErrorMessage(ex);
             inboxService.markFailed(event.messageId(), errorMessage);
+            sendErrorEvent(event, errorMessage);
             log.error("Failed to process conversion message. messageId={}, reason={}",
                     event.messageId(), errorMessage, ex);
             throw new ConversionProcessingException(
@@ -102,6 +106,19 @@ public class ConversionServiceImpl implements ConversionService {
         );
 
         conversionEventProducer.sendCompleted(completedEvent);
+    }
+
+    private void sendErrorEvent(FileConversionRequestedEvent event, String errorMessage) {
+        try {
+            FileConversionErrorEvent errorEvent = new FileConversionErrorEvent(
+                    event.messageId(),
+                    errorMessage
+            );
+            conversionErrorEventProducer.sendError(errorEvent);
+        } catch (Exception ex) {
+            log.error("Failed to send conversion error event. messageId={}, reason={}",
+                    event.messageId(), errorMessage, ex);
+        }
     }
 
     private String resolveBucket(String bucket) {

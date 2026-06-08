@@ -21,6 +21,7 @@ import org.springframework.kafka.core.ProducerFactory;
 import org.springframework.kafka.listener.ContainerProperties;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
+import ru.adnr.converter.app.dto.FileConversionErrorEvent;
 import ru.adnr.converter.app.dto.FileConversionCompletedEvent;
 import ru.adnr.converter.app.dto.FileConversionRequestedEvent;
 
@@ -88,5 +89,30 @@ public class ConversionKafkaConfig {
             ProducerFactory<String, FileConversionCompletedEvent> fileConversionCompletedProducerFactory
     ) {
         return new KafkaTemplate<>(fileConversionCompletedProducerFactory);
+    }
+
+    @Bean
+    public ProducerFactory<String, FileConversionErrorEvent> fileConversionErrorProducerFactory(
+            @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
+            ObjectMapper objectMapper
+    ) {
+        Map<String, Object> properties = new HashMap<>();
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+
+        JsonSerializer<FileConversionErrorEvent> valueSerializer = new JsonSerializer<>(objectMapper);
+        valueSerializer.setAddTypeInfo(false);
+
+        return new DefaultKafkaProducerFactory<>(
+                properties,
+                new StringSerializer(),
+                valueSerializer
+        );
+    }
+
+    @Bean
+    public KafkaTemplate<String, FileConversionErrorEvent> fileConversionErrorKafkaTemplate(
+            ProducerFactory<String, FileConversionErrorEvent> fileConversionErrorProducerFactory
+    ) {
+        return new KafkaTemplate<>(fileConversionErrorProducerFactory);
     }
 }
